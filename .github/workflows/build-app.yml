@@ -15,9 +15,6 @@ on:
       DOCKERFILE:
         required: true
         type: string
-      APPLICATION:
-        required: true
-        type: string
     secrets:
       GCP_SERVICE_ACCOUNT_KEY:
         required: true
@@ -27,7 +24,6 @@ env:
   REGION: ${{ inputs.REGION }}
   GAR_LOCATION: ${{ inputs.GAR_LOCATION }}
   DOCKERFILE: ${{ inputs.DOCKERFILE }}
-  APPLICATION: ${{ inputs.APPLICATION }}
 
 jobs:
   build_app_image:
@@ -56,8 +52,7 @@ jobs:
         env:
           GAR_LOCATION: ${{ env.GAR_LOCATION }}
           GITHUB_SHA: ${{ github.sha }}
-          APPLICATION: ${{ env.APPLICATION }}
         run: |
-          docker build -f $DOCKERFILE -t $GAR_LOCATION/$APPLICATION:$GITHUB_SHA -t $GAR_LOCATION/$APPLICATION:latest .
-          
-          docker push --all-tags $GAR_LOCATION/$APPLICATION
+          docker build -f $DOCKERFILE -t $GAR_LOCATION:$GITHUB_SHA -t $GAR_LOCATION:latest .
+
+          docker push --all-tags $GAR_LOCATION
