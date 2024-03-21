@@ -16,7 +16,8 @@ jobs:
       GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_DEV }}
 
   deploy-app-infra:
-    uses: ./.github/workflows/deploy-app-infra.yml
+    uses: ./.github/workflows/deploy-infra.yml
     with:
-      terraform_workspace: dev
+      TERAFORM_WORKSPACE: dev
+      WORKING_DIRECTORY: demo-app/terraform
     secrets: inherit
