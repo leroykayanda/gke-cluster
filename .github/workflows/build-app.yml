@@ -59,4 +59,5 @@ jobs:
           APPLICATION: ${{ env.APPLICATION }}
         run: |
           docker build -f $DOCKERFILE -t $GAR_LOCATION/$APPLICATION:$GITHUB_SHA -t $GAR_LOCATION/$APPLICATION:latest .
-          docker push --all-tags $GAR_LOCATION
+          
+          docker push --all-tags $GAR_LOCATION/$APPLICATION
