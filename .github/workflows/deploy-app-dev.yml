@@ -8,14 +8,14 @@ jobs:
   build-app-image:
     uses: ./.github/workflows/build-app.yml
     with:
-      ecr_repo: dev-demo-app
-      region: eu-west-1
+      PROJECT_ID: tumahela
+      REGION: europe-west1
+      GAR_LOCATION: europe-west1-docker.pkg.dev/tumahela/demo-app/
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_DEV }}
 
-  deploy-app-infra:
-    uses: ./.github/workflows/deploy-app-infra.yml
-    with:
-      terraform_workspace: dev
-    secrets: inherit
+  # deploy-app-infra:
+  #   uses: ./.github/workflows/deploy-app-infra.yml
+  #   with:
+  #     terraform_workspace: dev
+  #   secrets: inherit
