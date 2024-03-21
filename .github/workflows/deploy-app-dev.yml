@@ -10,7 +10,9 @@ jobs:
     with:
       PROJECT_ID: tumahela
       REGION: europe-west1
-      GAR_LOCATION: europe-west1-docker.pkg.dev/tumahela/demo-app/
+      GAR_LOCATION: europe-west1-docker.pkg.dev/tumahela/demo-app
+      DOCKERFILE: demo-app/Dockerfile
+      APPLICATION: demo-app
     secrets:
       GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_DEV }}
 

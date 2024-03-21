@@ -12,6 +12,12 @@ on:
       GAR_LOCATION:
         required: true
         type: string
+      DOCKERFILE:
+        required: true
+        type: string
+      APPLICATION:
+        required: true
+        type: string
     secrets:
       GCP_SERVICE_ACCOUNT_KEY:
         required: true
@@ -20,6 +26,8 @@ env:
   PROJECT_ID: ${{ inputs.PROJECT_ID }}
   REGION: ${{ inputs.REGION }}
   GAR_LOCATION: ${{ inputs.GAR_LOCATION }}
+  DOCKERFILE: ${{ inputs.DOCKERFILE }}
+  APPLICATION: ${{ inputs.APPLICATION }}
 
 jobs:
   build_app_image:
@@ -42,13 +50,13 @@ jobs:
       - name: "Docker auth"
         run: |-
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-          
-      # - name: Build, tag, and push image to ECR
-      #   id: build-image
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     IMAGE_TAG: ${{ github.sha }}
-      #   run: |
-      #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f demo-app/Dockerfile .
 
-      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+      - name: Build, tag, and push image to ECR
+        id: build-image
+        env:
+          GAR_LOCATION: ${{ env.GAR_LOCATION }}
+          GITHUB_SHA: ${{ github.sha }}
+          APPLICATION: ${{ env.APPLICATION }}
+        run: |
+          docker build -f $DOCKERFILE -t $GAR_LOCATION/$APPLICATION:$GITHUB_SHA -t $GAR_LOCATION/$APPLICATION:latest .
+          docker push --all-tags $GAR_LOCATION
