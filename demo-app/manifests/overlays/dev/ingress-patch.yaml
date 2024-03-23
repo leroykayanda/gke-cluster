@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-app
+spec:
+  rules:
+  - host: "demo-app.gcp.rentrahisi.co.ke"
+    http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: demo-app
+            port:
+              number: 8080

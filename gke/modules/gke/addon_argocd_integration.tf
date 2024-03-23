@@ -122,3 +122,24 @@ resource "kubernetes_manifest" "argocd_ingress" {
     }
   }
 }
+
+#argo ssh auth
+
+resource "kubernetes_secret" "argo-secret" {
+  count = var.cluster_created ? 1 : 0
+  metadata {
+    name      = "private-repo"
+    namespace = "argocd"
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repo-creds"
+    }
+  }
+
+  type = "Opaque"
+
+  data = {
+    "type"          = "git"
+    "url"           = var.argo_repo
+    "sshPrivateKey" = var.argo_ssh_private_key
+  }
+}

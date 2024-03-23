@@ -171,3 +171,13 @@ variable "argo_zone_name" {
     production  = ""
   }
 }
+
+variable "argo_ssh_private_key" {
+  description = "The SSH private key"
+  type        = string
+}
+
+variable "argo_repo" {
+  type    = string
+  default = "git@github.com:leroykayanda"
+}

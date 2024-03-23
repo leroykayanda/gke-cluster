@@ -26,4 +26,6 @@ module "gke" {
   namespaces_to_log      = var.namespaces_to_log
   argo_domain_name       = var.argo_domain_name[var.env]
   argo_zone_name         = var.argo_zone_name[var.env]
+  argo_repo              = var.argo_repo
+  argo_ssh_private_key   = var.argo_ssh_private_key
 }

@@ -81,7 +81,8 @@ variable "required_apis" {
     "container.googleapis.com",
     "artifactregistry.googleapis.com",
     "logging.googleapis.com",
-    "certificatemanager.googleapis.com"
+    "certificatemanager.googleapis.com",
+    "secretmanager.googleapis.com"
   ]
 }
 
@@ -156,4 +157,13 @@ variable "argo_domain_name" {
 
 variable "argo_zone_name" {
   type = string
+}
+
+variable "argo_repo" {
+  type = string
+}
+
+variable "argo_ssh_private_key" {
+  description = "The SSH private key"
+  type        = string
 }

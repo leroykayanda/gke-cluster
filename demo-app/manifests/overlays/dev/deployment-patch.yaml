@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: demo-app
+          image: europe-west1-docker.pkg.dev/tumahela/demo-app/demo-app:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
