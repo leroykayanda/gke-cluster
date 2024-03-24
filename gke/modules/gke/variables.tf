@@ -167,3 +167,10 @@ variable "argo_ssh_private_key" {
   description = "The SSH private key"
   type        = string
 }
+
+variable "argo_slack_token" {
+  type = string
+}
+
+variable "argocd_image_updater_values" {
+}

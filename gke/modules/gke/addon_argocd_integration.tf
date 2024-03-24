@@ -143,3 +143,132 @@ resource "kubernetes_secret" "argo-secret" {
     "sshPrivateKey" = var.argo_ssh_private_key
   }
 }
+
+#argo notifications secret
+
+resource "kubernetes_secret" "argocd_notifications_secret" {
+  count = var.cluster_created ? 1 : 0
+  metadata {
+    name      = "argocd-notifications-secret"
+    namespace = "argocd"
+  }
+
+  data = {
+    "slack-token" = var.argo_slack_token
+  }
+
+  type = "Opaque"
+}
+
+#argo notifications
+
+resource "kubernetes_config_map" "argocd_notifications_cm" {
+  count = var.cluster_created ? 1 : 0
+  metadata {
+    name      = "argocd-notifications-cm"
+    namespace = "argocd"
+  }
+
+  data = {
+    "service.slack" = <<-EOT
+      token: $slack-token
+    EOT
+
+    "context" = <<-EOT
+      argocdUrl: https://${var.argo_domain_name}
+    EOT
+
+    "trigger.on-health-degraded" = <<-EOT
+      - when: app.status.health.status == 'Degraded' || app.status.health.status == 'Missing' || app.status.health.status == 'Unknown'
+        send: [app-degraded]
+    EOT
+
+    "template.app-degraded" = <<-EOT
+      message: |
+        ArgoCD - Application {{.app.metadata.name}} is {{.app.status.health.status}}.
+      slack:
+        attachments: |
+          [{
+            "title": "{{.app.metadata.name}}",
+            "title_link": "{{.context.argocdUrl}}/applications/argocd/{{.app.metadata.name}}",
+            "color": "#ff0000",
+            "fields": [{
+              "title": "App Health",
+              "value": "{{.app.status.health.status}}",
+              "short": true
+            }, {
+              "title": "Repository",
+              "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            }]
+          }]
+    EOT
+  }
+}
+
+# image updater
+
+resource "helm_release" "image_updater" {
+  count      = var.cluster_created ? 1 : 0
+  name       = "argocd-image-updater"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argocd-image-updater"
+  namespace  = "argocd"
+  version    = "0.9.6"
+  values     = var.argocd_image_updater_values
+
+  set {
+    name  = "serviceAccount.create"
+    value = false
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "argocd-image-updater-sa"
+  }
+
+}
+
+# workload identity for image updater
+
+resource "kubernetes_service_account" "ksa" {
+  metadata {
+    name      = "argocd-image-updater-sa"
+    namespace = "argocd"
+    annotations = {
+      "iam.gke.io/gcp-service-account" = google_service_account.app_sa.email
+    }
+  }
+}
+
+resource "google_service_account" "app_sa" {
+  account_id   = "argocd-image-updater-sa"
+  display_name = "argocd-image-updater-sa"
+}
+
+resource "google_project_iam_member" "artifactregistry_repoAdmin" {
+  project = var.project_id
+  role    = "roles/artifactregistry.repoAdmin"
+  member  = "serviceAccount:${google_service_account.app_sa.email}"
+}
+
+resource "google_service_account_iam_binding" "argo_workload_identity_binding" {
+  service_account_id = google_service_account.app_sa.name
+  role               = "roles/iam.workloadIdentityUser"
+  members            = ["serviceAccount:${var.project_id}.svc.id.goog[argocd/argocd-image-updater-sa]"]
+}
+
+resource "kubernetes_config_map" "auth_cm" {
+  metadata {
+    name      = "auth-cm"
+    namespace = "argocd"
+  }
+
+  data = {
+    "auth.sh" = <<-EOF
+      #!/bin/sh
+      ACCESS_TOKEN=$(wget --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token -q -O - | grep -Eo '"access_token":.*?[^\\]",' | cut -d '"' -f 4)
+      echo "oauth2accesstoken:$ACCESS_TOKEN"
+    EOF
+  }
+}

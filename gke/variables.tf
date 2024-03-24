@@ -181,3 +181,30 @@ variable "argo_repo" {
   type    = string
   default = "git@github.com:leroykayanda"
 }
+
+variable "argo_slack_token" {
+  type = string
+}
+
+variable "argocd_image_updater_values" {
+  type = list(string)
+  default = [
+    <<EOF
+config:
+  registries:
+    - name: GCP Artifact Registry
+      api_url: https://europe-west1-docker.pkg.dev
+      prefix: europe-west1-docker.pkg.dev
+      credentials: ext:/auth/auth.sh
+      credsexpire: 30m
+volumes:
+- configMap:
+    defaultMode: 0755
+    name: auth-cm
+  name: auth
+volumeMounts:
+- mountPath: /auth
+  name: auth
+EOF
+  ]
+}

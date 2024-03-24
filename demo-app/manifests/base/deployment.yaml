@@ -15,6 +15,7 @@ spec:
       labels:
         app: demo-app
     spec:
+      serviceAccountName: demo-app
       containers:
         - name: demo-app
           ports:
