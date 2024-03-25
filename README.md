@@ -2,6 +2,8 @@
 
 This repo contains terraform code that sets up a VPC,  GKE cluster and a demo application.
 
+[Terraform modules](https://github.com/leroykayanda/terraform-cloud-modules)
+
 **GKE cluser components**
 1.  GKE module
 2.  A datadog dashboard showing key kubernetes metrics and datagog alarms.
