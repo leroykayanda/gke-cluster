@@ -116,7 +116,7 @@ variable "master_ipv4_cidr_block" {
 #datadog
 variable "cluster_created" {
   default = {
-    development = true
+    development = false
     production  = false
   }
 }

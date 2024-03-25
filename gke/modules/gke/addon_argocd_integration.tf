@@ -45,20 +45,23 @@ EOT
 }
 
 resource "google_compute_global_address" "static-ip" {
-  name = "argocd"
+  count = var.cluster_created ? 1 : 0
+  name  = "argocd"
 }
 
 resource "google_dns_record_set" "argo" {
+  count        = var.cluster_created ? 1 : 0
   name         = "${var.argo_domain_name}."
   managed_zone = var.argo_zone_name
   type         = "A"
   ttl          = 300
 
-  rrdatas = [google_compute_global_address.static-ip.address]
+  rrdatas = [google_compute_global_address.static-ip[0].address]
 }
 
 resource "google_compute_managed_ssl_certificate" "argo_cert" {
-  name = "argocd"
+  count = var.cluster_created ? 1 : 0
+  name  = "argocd"
 
   managed {
     domains = [var.argo_domain_name]
@@ -66,6 +69,7 @@ resource "google_compute_managed_ssl_certificate" "argo_cert" {
 }
 
 resource "kubernetes_manifest" "argocd_frontendconfig" {
+  count = var.cluster_created ? 1 : 0
   manifest = {
     "apiVersion" = "networking.gke.io/v1beta1"
     "kind"       = "FrontendConfig"
@@ -83,6 +87,7 @@ resource "kubernetes_manifest" "argocd_frontendconfig" {
 
 #kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode
 resource "kubernetes_manifest" "argocd_ingress" {
+  count = var.cluster_created ? 1 : 0
   manifest = {
     apiVersion = "networking.k8s.io/v1"
     kind       = "Ingress"
@@ -233,33 +238,38 @@ resource "helm_release" "image_updater" {
 # https://github.com/argoproj-labs/argocd-image-updater/issues/319
 
 resource "kubernetes_service_account" "ksa" {
+  count = var.cluster_created ? 1 : 0
   metadata {
     name      = "argocd-image-updater-sa"
     namespace = "argocd"
     annotations = {
-      "iam.gke.io/gcp-service-account" = google_service_account.app_sa.email
+      "iam.gke.io/gcp-service-account" = google_service_account.app_sa[0].email
     }
   }
 }
 
 resource "google_service_account" "app_sa" {
+  count        = var.cluster_created ? 1 : 0
   account_id   = "argocd-image-updater-sa"
   display_name = "argocd-image-updater-sa"
 }
 
 resource "google_project_iam_member" "artifactregistry_repoAdmin" {
+  count   = var.cluster_created ? 1 : 0
   project = var.project_id
   role    = "roles/artifactregistry.repoAdmin"
-  member  = "serviceAccount:${google_service_account.app_sa.email}"
+  member  = "serviceAccount:${google_service_account.app_sa[0].email}"
 }
 
 resource "google_service_account_iam_binding" "argo_workload_identity_binding" {
-  service_account_id = google_service_account.app_sa.name
+  count              = var.cluster_created ? 1 : 0
+  service_account_id = google_service_account.app_sa[0].name
   role               = "roles/iam.workloadIdentityUser"
   members            = ["serviceAccount:${var.project_id}.svc.id.goog[argocd/argocd-image-updater-sa]"]
 }
 
 resource "kubernetes_config_map" "auth_cm" {
+  count = var.cluster_created ? 1 : 0
   metadata {
     name      = "auth-cm"
     namespace = "argocd"

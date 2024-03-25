@@ -1,5 +1,4 @@
 module "gke" {
-  //source                      = "./modules/gke"
   source                      = "app.terraform.io/RentRahisi/modules/cloud//gcp/gke"
   project_id                  = var.project_id[var.env]
   cluster_name                = var.cluster_name[var.env]
