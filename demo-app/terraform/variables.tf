@@ -44,7 +44,7 @@ variable "argo_annotations" {
   default = {
     "development" = {
       "notifications.argoproj.io/subscribe.on-health-degraded.slack" = "rentrahisi"
-      "argocd-image-updater.argoproj.io/image-list"                  = "repo=europe-west1-docker.pkg.dev/tumahela/demo-app"
+      "argocd-image-updater.argoproj.io/image-list"                  = "repo=europe-west1-docker.pkg.dev/tumahela/demo-app/demo-app"
       "argocd-image-updater.argoproj.io/repo.update-strategy"        = "latest"
       "argocd-image-updater.argoproj.io/myimage.ignore-tags"         = "latest"
     },

@@ -265,10 +265,10 @@ resource "kubernetes_config_map" "auth_cm" {
   }
 
   data = {
-    "auth.sh" = <<-EOF
-      #!/bin/sh
-      ACCESS_TOKEN=$(wget --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token -q -O - | grep -Eo '"access_token":.*?[^\\]",' | cut -d '"' -f 4)
-      echo "oauth2accesstoken:$ACCESS_TOKEN"
-    EOF
+    "auth.sh" = <<EOF
+#!/bin/sh
+ACCESS_TOKEN=$(wget --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token -q -O - | grep -Eo '"access_token":.*?[^\\]",' | cut -d '"' -f 4)
+echo "oauth2accesstoken:$ACCESS_TOKEN"
+EOF
   }
 }
