@@ -230,6 +230,7 @@ resource "helm_release" "image_updater" {
 }
 
 # workload identity for image updater
+# https://github.com/argoproj-labs/argocd-image-updater/issues/319
 
 resource "kubernetes_service_account" "ksa" {
   metadata {
